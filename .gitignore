@@ -26,6 +26,11 @@ yarn-error.log*
 logs/
 *.log
 
+# Python Packaging
+dist/
+build/
+*.egg-info/
+
 # OS files
 .DS_Store
 .DS_Store?
