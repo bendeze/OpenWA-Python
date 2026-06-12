@@ -13,7 +13,7 @@
 
 > **Notice**: **OpenWA-Python** is a Python/FastAPI adaptation of the incredible [OpenWA](https://github.com/rmyndharis/OpenWA) project. While the original uses a pure Node.js/NestJS monolith, this fork restructures the backend into a Hybrid Architecture (FastAPI API Gateway + Node.js Worker) for developers who want to integrate WhatsApp natively into Python ecosystems.
 
-## What is OpenWA?
+## What is OpenWA-Python?
 
 **OpenWA-Python** is a powerful HTTP API gateway for WhatsApp. It allows developers to send messages, manage sessions, and receive webhooks without touching complex headless browser automation or paying expensive monthly fees to third-party services.
 
