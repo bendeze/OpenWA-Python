@@ -4,10 +4,10 @@
   <p>The free, open-source, production-ready WhatsApp REST API Gateway.</p>
 
   <p>
-    <a href="https://github.com/yourusername/openwa-python/stargazers"><img src="https://img.shields.io/github/stars/yourusername/openwa-python?style=flat-square" alt="Stars" /></a>
-    <a href="https://github.com/yourusername/openwa-python/network/members"><img src="https://img.shields.io/github/forks/yourusername/openwa-python?style=flat-square" alt="Forks" /></a>
-    <a href="https://github.com/yourusername/openwa-python/issues"><img src="https://img.shields.io/github/issues/yourusername/openwa-python?style=flat-square" alt="Issues" /></a>
-    <a href="https://github.com/yourusername/openwa-python/blob/main/LICENSE"><img src="https://img.shields.io/github/license/yourusername/openwa-python?style=flat-square" alt="License" /></a>
+    <a href="https://github.com/yourusername/openwa-python/stargazers"><img src="https://img.shields.io/github/stars/bonheurNE07/openwa-python?style=flat-square" alt="Stars" /></a>
+    <a href="https://github.com/yourusername/openwa-python/network/members"><img src="https://img.shields.io/github/forks/bonheurNE07/openwa-python?style=flat-square" alt="Forks" /></a>
+    <a href="https://github.com/yourusername/openwa-python/issues"><img src="https://img.shields.io/github/issues/bonheurNE07/openwa-python?style=flat-square" alt="Issues" /></a>
+    <a href="https://github.com/bonheurNE07/openwa-python/blob/main/LICENSE"><img src="https://img.shields.io/github/license/yourusername/openwa-python?style=flat-square" alt="License" /></a>
   </p>
 </div>
 
