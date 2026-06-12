@@ -15,7 +15,33 @@ Both SDKs are designed with the following core principles:
 
 ## 18.2 Python SDK (`sdk/python`)
 
-The Python SDK is located in the `sdk/python/openwa/` directory.
+The Python SDK is located in the `sdk/python/` directory.
+
+### Installation
+
+1. `pip install openwa-sdk`
+2. `npm install @openwa/sdk` (planned)
+
+### Server vs Client Architecture
+
+It is crucial to understand that the SDK acts purely as a **"Remote Control"**. 
+
+* **The OpenWA Server (The TV)**: Must be running somewhere in the world (e.g., hosted on a DigitalOcean droplet, an AWS EC2 instance, or locally via Docker). It runs the heavy WhatsApp Chromium browser and listens for HTTP requests.
+* **The SDK (The Remote Control)**: A lightweight library that you install in your own separate project (like a Django app or a data analytics script). 
+
+You simply point the SDK to your running server's IP address or domain name:
+
+```python
+from openwa import OpenWAClient
+
+client = OpenWAClient(
+    base_url="http://your-cloud-server-ip:2785", 
+    api_key="your-secret-key"
+)
+
+# Sends a request over the internet to trigger the WhatsApp engine on your server
+client.messages.send_text("my-session", {"chatId": "123@c.us", "text": "Hello from the SDK!"})
+```
 
 ### Initialization
 
