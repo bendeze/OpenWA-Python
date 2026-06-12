@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+sqlalchemy
+aiosqlite
+redis
+python-socketio
+pydantic
+python-dotenv
+docker
+pydantic-settings
+httpx
+websockets

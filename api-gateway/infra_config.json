@@ -1,0 +1,52 @@
+{
+    "database": {
+        "type": "sqlite",
+        "builtIn": false,
+        "host": "localhost",
+        "port": "5432",
+        "username": "postgres",
+        "password": "",
+        "database": "openwa",
+        "poolSize": 10,
+        "sslEnabled": false
+    },
+    "redis": {
+        "enabled": false,
+        "builtIn": false,
+        "host": "localhost",
+        "port": "6379",
+        "password": "",
+        "connected": true
+    },
+    "queue": {
+        "enabled": true
+    },
+    "storage": {
+        "type": "local",
+        "builtIn": false,
+        "localPath": "./uploads",
+        "s3Bucket": "",
+        "s3Region": "ap-southeast-1",
+        "s3AccessKey": "",
+        "s3SecretKey": "",
+        "s3Endpoint": ""
+    },
+    "server": {
+        "port": "2785",
+        "nodeEnv": "development",
+        "domain": "localhost",
+        "dashboardPort": "2886",
+        "baseUrl": "",
+        "dashboardUrl": "",
+        "corsOrigins": "*"
+    },
+    "webhook": {
+        "timeout": 10050,
+        "maxRetries": 5,
+        "retryDelay": 5000
+    },
+    "rateLimit": {
+        "ttl": 60,
+        "max": 100
+    }
+}

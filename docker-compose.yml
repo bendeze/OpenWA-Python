@@ -1,0 +1,177 @@
+# OpenWA - Docker Compose Configuration
+# Smart Orchestration with Profiles
+
+services:
+  # ===== CORE: Traefik Reverse Proxy =====
+  traefik:
+    image: traefik:v3.0
+    container_name: openwa-traefik
+    profiles: ['with-proxy', 'full']
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:${DASHBOARD_PORT:-2886}:80'
+      - '127.0.0.1:8080:8080' # Traefik dashboard
+    volumes:
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
+    labels:
+      - 'com.openwa.service=proxy'
+      - 'com.openwa.core=true'
+
+  # ===== CORE: OpenWA Backend API =====
+  openwa-api:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: openwa-api
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:${API_PORT:-2785}:8000'
+    expose:
+      - '8000'
+    environment:
+      # Core
+      - NODE_ENV=${NODE_ENV:-production}
+      - API_PORT=${API_PORT:-2785}
+      # Database
+      - DATABASE_TYPE=${DATABASE_TYPE:-sqlite}
+      - DATABASE_NAME=${DATABASE_NAME:-/app/openwa.db}
+      - DATABASE_HOST=${DATABASE_HOST:-postgres}
+      - DATABASE_PORT=${DATABASE_PORT:-5432}
+      - DATABASE_USERNAME=${DATABASE_USERNAME:-openwa}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-openwa}
+      # Redis
+      - REDIS_ENABLED=${REDIS_ENABLED:-false}
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+    volumes:
+      - openwa-data:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./.env:/app/.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: false
+      redis:
+        condition: service_healthy
+        required: false
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    labels:
+      - 'com.openwa.service=api'
+      - 'com.openwa.core=true'
+
+  # ===== CORE: WA Worker =====
+  wa-worker:
+    build:
+      context: ./wa-worker
+      dockerfile: Dockerfile
+    container_name: wa-worker
+    restart: unless-stopped
+    environment:
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+    depends_on:
+      redis:
+        condition: service_healthy
+        required: false
+    labels:
+      - 'com.openwa.service=worker'
+      - 'com.openwa.core=true'
+
+  # ===== CORE: Dashboard Frontend =====
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile.traefik
+    container_name: openwa-dashboard
+    profiles: ['with-dashboard', 'full']
+    restart: unless-stopped
+    expose:
+      - '80'
+    depends_on:
+      - openwa-api
+    labels:
+      - 'com.openwa.service=dashboard'
+      - 'com.openwa.core=true'
+
+  # ===== OPTIONAL: Built-in PostgreSQL =====
+  postgres:
+    image: postgres:16-alpine
+    container_name: openwa-postgres
+    profiles: ['postgres']
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DATABASE_USERNAME:-openwa}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-openwa}
+      POSTGRES_DB: ${DATABASE_NAME:-openwa}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DATABASE_USERNAME:-openwa}']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    labels:
+      - 'com.openwa.service=database'
+      - 'com.openwa.builtin=true'
+
+  # ===== OPTIONAL: Built-in Redis =====
+  redis:
+    image: redis:7-alpine
+    container_name: openwa-redis
+    profiles: ['redis']
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    labels:
+      - 'com.openwa.service=cache'
+      - 'com.openwa.builtin=true'
+
+  # ===== OPTIONAL: Built-in MinIO (S3-compatible) =====
+  minio:
+    image: minio/minio
+    container_name: openwa-minio
+    profiles: ['minio']
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-minioadmin}
+    volumes:
+      - minio-data:/data
+    ports:
+      - '127.0.0.1:9000:9000'
+      - '127.0.0.1:9001:9001'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    labels:
+      - 'com.openwa.service=storage'
+      - 'com.openwa.builtin=true'
+
+volumes:
+  openwa-data:
+    driver: local
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+  minio-data:
+    driver: local
+
+networks:
+  default:
+    name: openwa-network

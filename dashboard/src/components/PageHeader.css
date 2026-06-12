@@ -1,0 +1,83 @@
+/* =============================================
+   PageHeader Component - Shared Styles
+   Consistent header styling for all pages
+   ============================================= */
+
+.page-header {
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.page-header__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.page-header__title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.page-header__title-group h1 {
+  margin: 0;
+  /* h1 styles inherited from global */
+}
+
+.page-header__badge {
+  display: inline-flex;
+}
+
+.page-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.page-header__subtitle {
+  margin: 0;
+  margin-top: 0.5rem; /* Consistent 8px gap from title row */
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .page-header__top {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .page-header__title-group h1 {
+    font-size: 1.5rem;
+  }
+
+  .page-header__actions {
+    flex-shrink: 0;
+  }
+
+  .page-header__subtitle {
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header__top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .page-header__actions {
+    width: 100%;
+  }
+
+  .page-header__actions > button,
+  .page-header__actions > .btn-primary,
+  .page-header__actions > .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+}

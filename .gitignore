@@ -1,0 +1,81 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build output
+dist/
+build/
+.next/
+out/
+
+# Testing
+coverage/
+
+# Environment
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+*.log
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+
+# Data and storage
+data/
+media/
+uploads/
+.wwebjs_auth/
+.wwebjs_cache/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Docker
+.docker/
+
+# Misc
+*.bak
+*.tmp
+*.temp
+
+# Git worktrees
+.worktrees/
+
+# AI Agents
+.agent/
+.claude/
+docs/plans/
+CLAUDE.md
+_docs/
+
+# Python & Hybrid Stack
+venv/
+__pycache__/
+.pytest_cache/
+api-gateway/openwa.db
+wa-worker/sessions/

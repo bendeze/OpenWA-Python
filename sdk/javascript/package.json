@@ -1,0 +1,37 @@
+{
+    "name": "@openwa/sdk",
+    "version": "0.0.1",
+    "description": "Official JavaScript/TypeScript SDK for OpenWA WhatsApp API Gateway",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "dev": "tsc --watch",
+        "test": "jest",
+        "lint": "eslint src/"
+    },
+    "keywords": [
+        "whatsapp",
+        "api",
+        "sdk",
+        "openwa",
+        "gateway"
+    ],
+    "author": "OpenWA Contributors",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/openwa/openwa",
+        "directory": "sdk/javascript"
+    },
+    "engines": {
+        "node": ">=18"
+    },
+    "devDependencies": {
+        "@types/jest": "^30.0.0",
+        "@types/node": "^25.9.3",
+        "jest": "^30.4.2",
+        "ts-jest": "^29.4.11",
+        "typescript": "^5.3.0"
+    }
+}
