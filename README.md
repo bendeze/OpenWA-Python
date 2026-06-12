@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="docs/logo/openwa-logo.png" alt="OpenWA Logo" width="200"/>
+  <img src="https://github.com/bonheurNE07/OpenWA-Python/blob/main/docs%2Flogo%2Fopenwa_logo.png" alt="OpenWA Logo" width="200"/>
   <h1>OpenWA-Python</h1>
   <p>The free, open-source, production-ready WhatsApp REST API Gateway.</p>
 
