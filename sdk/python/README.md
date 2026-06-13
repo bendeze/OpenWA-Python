@@ -1,6 +1,6 @@
 # OpenWA Python SDK
 
-The official Python client library for the [OpenWA](https://github.com/bonheurNE07/OpenWA-Python) REST API Gateway. 
+The official Python client library for the [OpenWA-Python](https://github.com/bonheurNE07/OpenWA-Python) REST API Gateway. 
 
 This SDK allows you to easily manage WhatsApp sessions, send text/media messages, and interact with WhatsApp groups natively in Python. It supports both **Synchronous** and **Asynchronous** workflows out of the box!
 
