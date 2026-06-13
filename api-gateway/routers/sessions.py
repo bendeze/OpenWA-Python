@@ -140,6 +140,37 @@ async def get_sessions(
     return result
 
 
+@router.get("/{session_id}", response_model=Dict[str, Any])
+async def get_session(
+    session_id: int,
+    db: Session = Depends(get_db),
+    api_key: str = Depends(verify_api_key),
+):
+    """Retrieve a single WhatsApp session by ID."""
+    s = db.query(models.Session).filter(models.Session.id == session_id).first()
+    if not s:
+        raise HTTPException(status_code=404, detail="Session not found")
+        
+    last_msg = (
+        db.query(func.max(models.MessageLog.timestamp))
+        .filter(models.MessageLog.session_id == str(s.id))
+        .scalar()
+    )
+    last_active = None
+    if last_msg:
+        last_active = datetime.datetime.fromtimestamp(last_msg).isoformat()
+
+    return {
+        "id": str(s.id),
+        "name": s.name,
+        "status": s.status,
+        "phone": s.phone,
+        "pushName": s.pushname,
+        "createdAt": s.created_at.isoformat() if s.created_at else None,
+        "lastActive": last_active,
+    }
+
+
 @router.get("/stats/overview", response_model=Dict[str, int])
 async def get_session_stats(
     db: Session = Depends(get_db), api_key: str = Depends(verify_api_key)
