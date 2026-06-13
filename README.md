@@ -32,32 +32,16 @@ OpenWA combines the best of two ecosystems:
 - Node.js 20+
 - Redis Server (Running locally or via Docker)
 
-### 1. Start Redis
-```bash
-# If you have Docker:
-docker run -d -p 6379:6379 redis:alpine
-```
+### Docker Compose (Recommended)
+The easiest way to run the entire stack (API Gateway, Node.js Worker, Redis, Traefik Proxy, and the Web Dashboard) is via Docker Compose:
 
-### 2. Boot the Node.js Worker
 ```bash
-cd wa-worker
-npm install
-npm run start
+docker compose --profile full up --build
 ```
-*The worker will connect to Redis and await commands.*
-
-### 3. Boot the FastAPI Gateway
-In a new terminal window:
-```bash
-cd api-gateway
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-uvicorn main:app --port 2785
-```
-
-### 4. Open Swagger UI
-Navigate to `http://localhost:2785/docs` to see the automatically generated interactive API documentation. You can create sessions, grab the QR code, and send messages directly from the browser!
+This will expose:
+- **API Gateway:** `http://localhost:2785`
+- **Swagger Docs:** `http://localhost:2785/docs`
+- **Web Dashboard:** `http://localhost:2886` (via Traefik)
 
 ---
 
@@ -73,7 +57,17 @@ pip install -e sdk/python
 from openwa import OpenWAClient
 
 client = OpenWAClient(base_url="http://localhost:2785", api_key="secret")
-client.messages.send_text("session_1", {"chatId": "123@c.us", "text": "Hello OpenWA!"})
+
+# Create and start a session
+session = client.sessions.create("my_session")
+client.sessions.start(session["id"])
+
+# Fetch QR code for login
+qr_data = client.sessions.qr(session["id"])
+print(qr_data["qr"]) # Base64 encoded QR image
+
+# Send a message
+client.messages.send_text(session["id"], {"chatId": "123@c.us", "text": "Hello OpenWA!"})
 ```
 
 ### TypeScript / JavaScript
