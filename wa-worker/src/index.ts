@@ -3,7 +3,9 @@ import Redis from 'ioredis';
 import qrcodeTerminal from 'qrcode-terminal';
 import * as qrcode from 'qrcode';
 
-const REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
+const REDIS_HOST = process.env.REDIS_HOST || '127.0.0.1';
+const REDIS_PORT = process.env.REDIS_PORT || '6379';
+const REDIS_URL = process.env.REDIS_URL || `redis://${REDIS_HOST}:${REDIS_PORT}`;
 
 const pubClient = new Redis(REDIS_URL);
 const subClient = new Redis(REDIS_URL);
