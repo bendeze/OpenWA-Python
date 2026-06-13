@@ -223,6 +223,9 @@ class _SessionsResource:
     def delete(self, session_id: str) -> None:
         self._client._request("DELETE", f"/api/sessions/{session_id}")
 
+    def qr(self, session_id: str) -> dict:
+        return self._client._request("GET", f"/api/sessions/{session_id}/qr")
+
 
 class _AsyncSessionsResource:
     def __init__(self, client: AsyncOpenWAClient) -> None:
@@ -245,6 +248,9 @@ class _AsyncSessionsResource:
 
     async def delete(self, session_id: str) -> None:
         await self._client._request("DELETE", f"/api/sessions/{session_id}")
+
+    async def qr(self, session_id: str) -> dict:
+        return await self._client._request("GET", f"/api/sessions/{session_id}/qr")
 
 
 class _MessagesResource:
