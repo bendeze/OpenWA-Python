@@ -49,8 +49,21 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="OpenWA Python API Gateway", lifespan=lifespan)
 socket_app = socketio.ASGIApp(sio, other_asgi_app=app)
 
-from routers import (api_keys, audit, auth, catalog, contacts, groups, health,
-                     infra, messages, plugins, sessions, stats, webhooks)
+from routers import (
+    api_keys,
+    audit,
+    auth,
+    catalog,
+    contacts,
+    groups,
+    health,
+    infra,
+    messages,
+    plugins,
+    sessions,
+    stats,
+    webhooks,
+)
 
 app.include_router(auth.router)
 app.include_router(sessions.router)
