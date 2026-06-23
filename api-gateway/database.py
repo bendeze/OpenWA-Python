@@ -30,7 +30,7 @@ else:
     else:
         # Locally, we are at /api-gateway, and data is at /data
         data_dir = os.path.join(base_dir, "..", "data")
-        
+
     os.makedirs(data_dir, exist_ok=True)
     db_path = os.path.abspath(os.path.join(data_dir, f"{db_name}.db"))
     SQLALCHEMY_DATABASE_URL = f"sqlite:///{db_path}"
