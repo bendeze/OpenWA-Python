@@ -76,3 +76,7 @@ class SaveConfigPayload(BaseModel):
 class RestartPayload(BaseModel):
     profiles: List[str] = []
     profilesToRemove: List[str] = []
+
+
+class ChatUnreadRequest(BaseModel):
+    chatId: str
