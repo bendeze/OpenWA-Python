@@ -168,6 +168,7 @@ async def process_wa_event(payload: dict, sio):
         logger.info(f"[Redis Event Received] {event}")
 
     from plugin_manager import plugin_manager
+
     await plugin_manager.dispatch(event, payload)
 
     if event in ["qr", "ready", "authenticated", "disconnected", "message"]:
