@@ -21,6 +21,7 @@ The API is grouped logically around RESTful resources.
 - `POST /api/sessions`: Create a new session in the database.
 - `POST /api/sessions/{session_id}/start`: Publish a command to Node.js to spin up the WhatsApp engine.
 - `GET /api/sessions/{session_id}/qr`: Fetch the QR code required to link the device.
+- `POST /api/sessions/{session_id}/chats/unread`: Mark a specific chat thread as unread.
 
 ### Messages `/api/sessions/{session_id}/messages`
 - `GET`: Fetch recent message logs from the database.
