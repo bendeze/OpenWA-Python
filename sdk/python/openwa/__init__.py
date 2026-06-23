@@ -226,6 +226,11 @@ class _SessionsResource:
     def qr(self, session_id: str) -> dict:
         return self._client._request("GET", f"/api/sessions/{session_id}/qr")
 
+    def mark_chat_unread(self, session_id: str, chat_id: str) -> dict:
+        return self._client._request(
+            "POST", f"/api/sessions/{session_id}/chats/unread", {"chatId": chat_id}
+        )
+
 
 class _AsyncSessionsResource:
     def __init__(self, client: AsyncOpenWAClient) -> None:
@@ -251,6 +256,11 @@ class _AsyncSessionsResource:
 
     async def qr(self, session_id: str) -> dict:
         return await self._client._request("GET", f"/api/sessions/{session_id}/qr")
+
+    async def mark_chat_unread(self, session_id: str, chat_id: str) -> dict:
+        return await self._client._request(
+            "POST", f"/api/sessions/{session_id}/chats/unread", {"chatId": chat_id}
+        )
 
 
 class _MessagesResource:
