@@ -124,11 +124,15 @@ curl -X POST http://localhost:2785/api/sessions/{sessionId}/start \
 curl http://localhost:2785/api/sessions/{sessionId}/qr \
   -H "X-API-Key: your-api-key"
 
-# Send a message
+# 4. Send a text message
 curl -X POST http://localhost:2785/api/sessions/{sessionId}/messages/send-text \
-  -H "X-API-Key: your-api-key" \
-  -H "Content-Type: application/json" \
-  -d '{"chatId": "628123456789@c.us", "text": "Hello from OpenWA!"}'
+  -H "X-API-Key: YOUR_API_KEY" \
+  -d '{"chatId": "62812345678@c.us", "text": "Hello World!"}'
+
+# 5. Mark chat as unread
+curl -X POST http://localhost:2785/api/sessions/{sessionId}/chats/unread \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -d '{"chatId": "62812345678@c.us"}'
 ```
 
 ## WebSocket Example (Socket.IO)
