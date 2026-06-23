@@ -248,6 +248,24 @@ subClient.on('message', async (channel, message) => {
         break;
 
       // --- RPC Commands ---
+      case 'MARK_CHAT_UNREAD':
+        if (clients.has(sessionId)) {
+          try {
+            const chat = await clients.get(sessionId)!.getChatById(payload.chatId);
+            if (chat) {
+              await chat.markUnread();
+              if (payload.req_id) publishReply(payload.req_id, { success: true });
+            } else {
+              if (payload.req_id) publishReply(payload.req_id, null, 'Chat not found');
+            }
+          } catch (e: any) {
+            const errStr = e?.message || String(e) || 'Unknown error marking chat unread';
+            if (payload.req_id) publishReply(payload.req_id, null, errStr);
+          }
+        } else if (payload.req_id) {
+          publishReply(payload.req_id, null, 'Client not initialized');
+        }
+        break;
       case 'GET_CONTACTS':
         if (!clients.has(sessionId)) return publishReply(payload.req_id, null, 'Client not initialized');
         try {
