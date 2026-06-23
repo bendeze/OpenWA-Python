@@ -1,13 +1,13 @@
 <div align="center">
-  <img src="https://github.com/bonheurNE07/OpenWA-Python/blob/main/docs%2Flogo%2Fopenwa_logo.png" alt="OpenWA Logo" width="200"/>
+  <img src="https://raw.githubusercontent.com/bendeze/OpenWA-Python/main/docs/logo/openwa_logo.png" alt="OpenWA Logo" width="200"/>
   <h1>OpenWA-Python</h1>
   <p>The free, open-source, production-ready WhatsApp REST API Gateway.</p>
 
   <p>
-    <a href="https://github.com/yourusername/openwa-python/stargazers"><img src="https://img.shields.io/github/stars/bonheurNE07/openwa-python?style=flat-square" alt="Stars" /></a>
-    <a href="https://github.com/yourusername/openwa-python/network/members"><img src="https://img.shields.io/github/forks/bonheurNE07/openwa-python?style=flat-square" alt="Forks" /></a>
-    <a href="https://github.com/yourusername/openwa-python/issues"><img src="https://img.shields.io/github/issues/bonheurNE07/openwa-python?style=flat-square" alt="Issues" /></a>
-    <a href="https://github.com/bonheurNE07/openwa-python/blob/main/LICENSE"><img src="https://img.shields.io/github/license/bonheurNE07/openwa-python?style=flat-square" alt="License" /></a>
+    <a href="https://github.com/bendeze/openwa-python/stargazers"><img src="https://img.shields.io/github/stars/bendeze/openwa-python?style=flat-square" alt="Stars" /></a>
+    <a href="https://github.com/bendeze/openwa-python/network/members"><img src="https://img.shields.io/github/forks/bendeze/openwa-python?style=flat-square" alt="Forks" /></a>
+    <a href="https://github.com/bendeze/openwa-python/issues"><img src="https://img.shields.io/github/issues/bendeze/openwa-python?style=flat-square" alt="Issues" /></a>
+    <a href="https://github.com/bendeze/openwa-python/blob/main/LICENSE"><img src="https://img.shields.io/github/license/bendeze/openwa-python?style=flat-square" alt="License" /></a>
   </p>
 </div>
 
