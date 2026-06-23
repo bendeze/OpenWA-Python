@@ -150,7 +150,7 @@ async def get_session(
     s = db.query(models.Session).filter(models.Session.id == session_id).first()
     if not s:
         raise HTTPException(status_code=404, detail="Session not found")
-        
+
     last_msg = (
         db.query(func.max(models.MessageLog.timestamp))
         .filter(models.MessageLog.session_id == str(s.id))
@@ -232,5 +232,30 @@ async def get_session_qr(
             "GET_QR_CODE", {"session_id": session_id}, timeout=15.0
         )
         return {"qrCode": qr_code, "status": db_session.status}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/{session_id}/chats/unread", response_model=Dict[str, Any])
+async def mark_chat_unread(
+    session_id: int,
+    request: schemas.ChatUnreadRequest,
+    db: Session = Depends(get_db),
+    api_key: str = Depends(verify_api_key),
+):
+    """Mark a specific chat as unread."""
+    db_session = (
+        db.query(models.Session).filter(models.Session.id == session_id).first()
+    )
+    if not db_session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    try:
+        result = await rpc_call(
+            "MARK_CHAT_UNREAD",
+            {"session_id": session_id, "chatId": request.chatId},
+            timeout=15.0,
+        )
+        return {"status": "success", "result": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
