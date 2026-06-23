@@ -108,6 +108,9 @@ export class OpenWAClient {
       start: (id: string) => this.request<Session>('POST', `/api/sessions/${id}/start`),
       stop: (id: string) => this.request<Session>('POST', `/api/sessions/${id}/stop`),
       delete: (id: string) => this.request<void>('DELETE', `/api/sessions/${id}`),
+      qr: (id: string) => this.request<{ qrCode: string; status: string }>('GET', `/api/sessions/${id}/qr`),
+      markChatUnread: (id: string, chatId: string) =>
+        this.request<{ status: string; result: any }>('POST', `/api/sessions/${id}/chats/unread`, { chatId }),
     };
   }
 
