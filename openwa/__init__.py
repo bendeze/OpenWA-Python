@@ -274,7 +274,13 @@ class _MessagesResource:
         res = self._client._request(
             "POST", f"/api/sessions/{session_id}/messages/send-text", data
         )
-        return MessageResponse(res["messageId"], res["timestamp"])
+        msg_id = (
+            str(res.get("messageId") or res.get("id") or "")
+            if isinstance(res, dict)
+            else ""
+        )
+        ts = int(res.get("timestamp") or 0) if isinstance(res, dict) else 0
+        return MessageResponse(msg_id, ts)
 
 
 class _AsyncMessagesResource:
@@ -290,7 +296,13 @@ class _AsyncMessagesResource:
         res = await self._client._request(
             "POST", f"/api/sessions/{session_id}/messages/send-text", data
         )
-        return MessageResponse(res["messageId"], res["timestamp"])
+        msg_id = (
+            str(res.get("messageId") or res.get("id") or "")
+            if isinstance(res, dict)
+            else ""
+        )
+        ts = int(res.get("timestamp") or 0) if isinstance(res, dict) else 0
+        return MessageResponse(msg_id, ts)
 
 
 class _WebhooksResource:
@@ -487,3 +499,29 @@ class _AsyncGroupsResource:
         return await self._client._request(
             "PUT", f"/api/sessions/{session_id}/groups/{group_id}/subject", data
         )
+
+
+from openwa.bot import (BaseStorage, Context, EventPayload, EventType,
+                        MediaType, MemoryStorage, MessagePayload, OpenWABot,
+                        Router, SenderInfo, State, StatesGroup)
+
+__all__ = [
+    "OpenWAClient",
+    "AsyncOpenWAClient",
+    "OpenWAError",
+    "OpenWAAPIError",
+    "OpenWAClientConfig",
+    "MessageResponse",
+    "OpenWABot",
+    "Router",
+    "Context",
+    "State",
+    "StatesGroup",
+    "BaseStorage",
+    "MemoryStorage",
+    "EventPayload",
+    "EventType",
+    "MediaType",
+    "MessagePayload",
+    "SenderInfo",
+]

@@ -1,7 +1,7 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/bendeze/OpenWA-Python/main/docs/logo/openwa_logo.png" alt="OpenWA Logo" width="200"/>
   <h1>OpenWA-Python</h1>
-  <p>Official Python SDK for the <a href="https://github.com/rmyndharis/OpenWA">OpenWA</a> WhatsApp API Gateway.</p>
+  <p>Python SDK & Bot Framework for the <a href="https://github.com/rmyndharis/OpenWA">OpenWA</a> WhatsApp API Gateway.</p>
 
   <p>
     <a href="https://github.com/bendeze/openwa-python/stargazers"><img src="https://img.shields.io/github/stars/bendeze/openwa-python?style=flat-square" alt="Stars" /></a>
@@ -16,16 +16,15 @@
 
 ## 📖 Overview
 
-**OpenWA-Python** (`openwa-sdk`) is the Python client library for [OpenWA](https://github.com/rmyndharis/OpenWA) (the open-source, self-hosted WhatsApp API Gateway).
+**OpenWA-Python** (`openwa-sdk`) is the Python client library and bot framework for [OpenWA](https://github.com/rmyndharis/OpenWA) (the open-source, self-hosted WhatsApp API Gateway).
 
-It provides both **synchronous** and **asynchronous** HTTP clients to interact with any running OpenWA instance:
+### Key Features
 
-- **Sessions**: Create, start, stop, restart, delete, check status, and retrieve QR codes.
-- **Messages**: Send text, images, files, locations, contacts, polls, reactions, and replies.
-- **Webhooks**: Register, inspect, and manage webhook endpoints.
-- **Contacts**: List, fetch, block, and unblock contacts.
-- **Groups**: List, fetch, create, leave groups, and manage participants.
-- **API Keys**: Manage authenticated API keys.
+* 🤖 **High-Level Bot Framework**: Decorator-driven command and message routing (`@bot.on_command`, `@bot.on_message`, `@bot.on_media`).
+* 🔄 **Finite State Machine (FSM)**: Multi-step conversation state management (`StatesGroup`, `State`, `MemoryStorage`).
+* ⚡ **Sync & Async REST Clients**: Type-safe HTTP clients with `httpx` and `pydantic`.
+* 💬 **Rich Context Actions**: `await ctx.reply()`, `await ctx.react("👍")`, `await ctx.quote()`, `await ctx.reply_image()`.
+* 🪝 **Webhook Dispatcher**: One-line integration into FastAPI, Flask, or Django (`await bot.feed_raw_event(payload)`).
 
 ---
 
@@ -48,79 +47,78 @@ pip install openwa-sdk
 pip install -e .
 ```
 
-### 3. Synchronous Client Usage
+### 3. Build a WhatsApp Bot (`OpenWABot`)
+
+```python
+from openwa import OpenWABot, Context, StatesGroup, State
+
+bot = OpenWABot(base_url="http://localhost:3000", api_key="your_api_key")
+
+# Command handler
+@bot.on_command("start")
+async def handle_start(ctx: Context):
+    await ctx.reply("👋 Welcome to our WhatsApp Bot!")
+
+# Echo command with arguments
+@bot.on_command("echo")
+async def handle_echo(ctx: Context):
+    await ctx.reply(f"🔊 Echo: {ctx.command_args}")
+
+# Multi-step conversation using FSM
+class FeedbackForm(StatesGroup):
+    waiting_for_name = State()
+    waiting_for_feedback = State()
+
+@bot.on_command("feedback")
+async def start_feedback(ctx: Context):
+    await ctx.set_state(FeedbackForm.waiting_for_name)
+    await ctx.reply("What is your name?")
+
+@bot.on_message(state=FeedbackForm.waiting_for_name)
+async def process_name(ctx: Context):
+    await ctx.update_data(name=ctx.text)
+    await ctx.set_state(FeedbackForm.waiting_for_feedback)
+    await ctx.reply(f"Nice to meet you {ctx.text}! What feedback do you have?")
+
+@bot.on_message(state=FeedbackForm.waiting_for_feedback)
+async def process_feedback(ctx: Context):
+    data = await ctx.get_data()
+    await ctx.clear_state()
+    await ctx.reply(f"✅ Thank you {data['name']}, feedback saved!")
+```
+
+### 4. Direct REST Client Usage
 
 ```python
 from openwa import OpenWAClient
 
-# Initialize client
 client = OpenWAClient(base_url="http://localhost:3000", api_key="your_api_key")
 
-# List sessions
-sessions = client.sessions.list()
-print("Active sessions:", sessions)
-
-# Send a text message
+# Send a direct message
 client.messages.send_text(
     session_id="default",
-    data={
-        "chatId": "1234567890@c.us",
-        "text": "Hello from OpenWA-Python! 🚀"
-    }
+    data={"chatId": "1234567890@c.us", "text": "Hello from OpenWA!"}
 )
 ```
 
-### 4. Asynchronous Client Usage
+---
 
-```python
-import asyncio
-from openwa import AsyncOpenWAClient
+## 📚 Documentation
 
-async def main():
-    async with AsyncOpenWAClient(base_url="http://localhost:3000", api_key="your_api_key") as client:
-        # Create and start a session
-        session = await client.sessions.create("my_session")
-        await client.sessions.start(session["id"])
-        
-        # Send a message
-        response = await client.messages.send_text(
-            session_id=session["id"],
-            data={"chatId": "1234567890@c.us", "text": "Async message!"}
-        )
-        print("Message sent:", response)
+Detailed documentation is available in the [`docs/`](file:///home/bonheur/openwa_python/docs) directory:
 
-asyncio.run(main())
-```
+- [01 - Getting Started](./docs/01-getting-started.md)
+- [02 - Architecture](./docs/02-architecture.md)
+- [03 - SDK & Bot Framework Reference](./docs/03-sdk-reference.md)
+- [04 - Development & Testing](./docs/04-development-testing.md)
 
 ---
 
-## 📚 SDK Reference
-
-### Available Resources
-
-| Resource | Method Examples |
-| :--- | :--- |
-| `client.sessions` | `.list()`, `.create(name)`, `.start(id)`, `.stop(id)`, `.qr(id)`, `.status(id)` |
-| `client.messages` | `.send_text(id, data)`, `.send_image(id, data)`, `.send_file(id, data)`, `.reply(id, data)` |
-| `client.webhooks` | `.list()`, `.create(data)`, `.delete(id)` |
-| `client.contacts` | `.list(session_id)`, `.get(session_id, contact_id)`, `.block(session_id, contact_id)` |
-| `client.groups` | `.list(session_id)`, `.create(session_id, data)`, `.add_participants(session_id, group_id, data)` |
-| `client.api_keys` | `.list()`, `.create(data)`, `.delete(id)` |
-
----
-
-## 🧪 Development & Testing
+## 🧪 Testing
 
 ```bash
-# Install development dependencies
-pip install -e ".[dev]"
-
-# Run unit tests
+# Run unit test suite
 pytest tests/
-
-# Format code
-black openwa/ tests/ examples/
-isort openwa/ tests/ examples/
 ```
 
 ---

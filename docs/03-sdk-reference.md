@@ -1,103 +1,119 @@
-# 03 - SDK Reference
+# 03 - SDK & Bot Framework Reference
 
-The `openwa` package provides both synchronous (`OpenWAClient`) and asynchronous (`AsyncOpenWAClient`) interfaces.
+The `openwa` package provides both low-level REST clients (`OpenWAClient`, `AsyncOpenWAClient`) and a high-level decorator-driven bot framework (`OpenWABot`).
 
 ---
 
-## Client Initialization
+## 1. High-Level Bot Framework (`OpenWABot`)
+
+The `OpenWABot` class provides an event-driven bot framework with command dispatching, regex pattern matching, media routing, and conversation state management (FSM).
 
 ```python
-from openwa import OpenWAClient, AsyncOpenWAClient
+from openwa import OpenWABot, Context, StatesGroup, State, MediaType
 
-# Explicit configuration:
-client = OpenWAClient(base_url="http://localhost:3000", api_key="secret", timeout=30.0)
+bot = OpenWABot(base_url="http://localhost:3000", api_key="secret")
+```
 
-# Or via environment variables (OPENWA_BASE_URL and OPENWA_API_KEY):
-client = OpenWAClient()
+### Decorators
+
+| Decorator | Parameters | Description |
+| :--- | :--- | :--- |
+| `@bot.on_command(command, prefixes, state, is_group)` | `command: str \| list[str]`, `prefixes: tuple = ('/', '!')`, `state: Optional[State]`, `is_group: Optional[bool]` | Handles WhatsApp commands (e.g. `/start`, `!help`). |
+| `@bot.on_message(pattern, state, is_group)` | `pattern: Optional[str \| Pattern]`, `state: Optional[State]`, `is_group: Optional[bool]` | Handles incoming text messages matching optional regex or state. |
+| `@bot.on_media(media_type, state, is_group)` | `media_type: Optional[MediaType \| list[MediaType]]`, `state: Optional[State]` | Handles incoming media (images, audio, video, voice notes, documents). |
+| `@bot.on_reaction(state)` | `state: Optional[State]` | Handles message reaction emoji events. |
+| `@bot.on_event(event_type, state)` | `event_type: EventType \| str`, `state: Optional[State]` | Handles system events (e.g. `qr`, `session_status`). |
+
+### Context Object (`Context`)
+
+Every handler receives a rich `ctx: Context` object:
+
+| Property / Method | Returns | Description |
+| :--- | :--- | :--- |
+| `ctx.message` | `MessagePayload` | Normalized incoming message data |
+| `ctx.chat_id` | `str` | Chat identifier (e.g. `1234567890@c.us` or `..._group@g.us`) |
+| `ctx.sender_id` | `str` | Author phone / WhatsApp ID |
+| `ctx.text` | `Optional[str]` | Message text or caption |
+| `ctx.command` | `Optional[str]` | Command name (e.g. `/start`) |
+| `ctx.command_args` | `str` | Arguments passed after the command |
+| `await ctx.reply(text)` | `MessageResponse` | Send text reply to current chat |
+| `await ctx.reply_image(file, caption)` | `dict` | Send image to current chat |
+| `await ctx.reply_file(file, caption, filename)` | `dict` | Send document / file |
+| `await ctx.reply_location(lat, lng, title)` | `dict` | Send GPS location |
+| `await ctx.reply_poll(name, options)` | `dict` | Send interactive poll |
+| `await ctx.react(emoji)` | `dict` | React to incoming message with emoji |
+| `await ctx.quote(text)` | `dict` | Reply quoting incoming message |
+| `await ctx.get_state()` | `Optional[str]` | Get user's current FSM conversation state |
+| `await ctx.set_state(state)` | `None` | Set user's FSM state |
+| `await ctx.clear_state()` | `None` | Reset FSM state |
+| `await ctx.get_data()` | `dict` | Retrieve stored context data |
+| `await ctx.update_data(**kwargs)` | `dict` | Update stored context data |
+| `await ctx.clear_data()` | `None` | Clear stored context data |
+
+### Finite State Machine (FSM)
+
+```python
+class Registration(StatesGroup):
+    waiting_for_name = State()
+    waiting_for_email = State()
+
+@bot.on_command("register")
+async def start_register(ctx: Context):
+    await ctx.set_state(Registration.waiting_for_name)
+    await ctx.reply("What is your name?")
+
+@bot.on_message(state=Registration.waiting_for_name)
+async def process_name(ctx: Context):
+    await ctx.update_data(name=ctx.text)
+    await ctx.set_state(Registration.waiting_for_email)
+    await ctx.reply(f"Thanks {ctx.text}! What is your email?")
+```
+
+### Feeding Webhook Events
+
+When receiving webhooks in FastAPI, Flask, or Django:
+
+```python
+@app.post("/webhook")
+async def webhook_handler(payload: dict):
+    handled = await bot.feed_raw_event(payload)
+    return {"handled": handled}
 ```
 
 ---
 
-## 1. Sessions (`client.sessions`)
+## 2. Low-Level Client API (`OpenWAClient` & `AsyncOpenWAClient`)
 
-Manage WhatsApp connections, QR codes, and session lifecycles.
+### Sessions (`client.sessions`)
 
-| Method | Parameters | Description |
-| :--- | :--- | :--- |
-| `list()` | - | List all configured sessions |
-| `get(session_id)` | `session_id: str` | Get metadata for a specific session |
-| `create(name)` | `name: str` | Create a new named session |
-| `start(session_id)` | `session_id: str` | Launch session browser / connection |
-| `stop(session_id)` | `session_id: str` | Disconnect session |
-| `restart(session_id)` | `session_id: str` | Restart session |
-| `delete(session_id)` | `session_id: str` | Permanently delete session and tokens |
-| `qr(session_id)` | `session_id: str` | Get Base64 QR code image for scanning |
-| `status(session_id)` | `session_id: str` | Check current connection status |
+| Method | Description |
+| :--- | :--- |
+| `list()` | List all configured sessions |
+| `get(session_id)` | Get session metadata |
+| `create(name)` | Create new session |
+| `start(session_id)` | Start session WhatsApp connection |
+| `stop(session_id)` | Disconnect session |
+| `restart(session_id)` | Restart session |
+| `delete(session_id)` | Delete session and token data |
+| `qr(session_id)` | Retrieve QR code for login |
+| `status(session_id)` | Check session status |
 
----
+### Messages (`client.messages`)
 
-## 2. Messages (`client.messages`)
+| Method | Description |
+| :--- | :--- |
+| `send_text(session_id, data)` | Send text message (`{"chatId": "...", "text": "..."}`) |
+| `send_image(session_id, data)` | Send image (`{"chatId": "...", "file": "...", "caption": "..."}`) |
+| `send_file(session_id, data)` | Send document/file |
+| `send_location(session_id, data)` | Send location |
+| `send_poll(session_id, data)` | Create WhatsApp poll |
+| `send_reaction(session_id, data)` | React to message |
+| `reply(session_id, data)` | Quote and reply to message |
+| `delete(session_id, message_id)` | Revoke sent message |
 
-Send messages and interactive content to WhatsApp chats.
+### Webhooks, Contacts, Groups, & API Keys
 
-| Method | Parameters | Description |
-| :--- | :--- | :--- |
-| `send_text(session_id, data)` | `session_id: str, data: dict` | Send text message (`{"chatId": "...", "text": "..."}`) |
-| `send_image(session_id, data)` | `session_id: str, data: dict` | Send image with caption (`{"chatId": "...", "file": "...", "caption": "..."}`) |
-| `send_file(session_id, data)` | `session_id: str, data: dict` | Send document / file |
-| `send_location(session_id, data)` | `session_id: str, data: dict` | Send GPS coordinates |
-| `send_contact(session_id, data)` | `session_id: str, data: dict` | Send vCard contact card |
-| `send_poll(session_id, data)` | `session_id: str, data: dict` | Create a WhatsApp poll |
-| `send_reaction(session_id, data)` | `session_id: str, data: dict` | React to a message with emoji |
-| `reply(session_id, data)` | `session_id: str, data: dict` | Reply to a specific `messageId` |
-| `delete(session_id, message_id)` | `session_id: str, message_id: str` | Revoke / delete a sent message |
-
----
-
-## 3. Webhooks (`client.webhooks`)
-
-Configure URLs where OpenWA pushes incoming message events.
-
-| Method | Parameters | Description |
-| :--- | :--- | :--- |
-| `list()` | - | List active webhook subscriptions |
-| `create(data)` | `data: dict` | Register a new webhook endpoint URL |
-| `get(webhook_id)` | `webhook_id: str` | Get webhook details |
-| `update(webhook_id, data)` | `webhook_id: str, data: dict` | Update webhook URL or events |
-| `delete(webhook_id)` | `webhook_id: str` | Remove webhook subscription |
-
----
-
-## 4. Contacts (`client.contacts`)
-
-| Method | Parameters | Description |
-| :--- | :--- | :--- |
-| `list(session_id)` | `session_id: str` | List contacts for a session |
-| `get(session_id, contact_id)` | `session_id: str, contact_id: str` | Get contact profile |
-| `block(session_id, contact_id)` | `session_id: str, contact_id: str` | Block a contact |
-| `unblock(session_id, contact_id)` | `session_id: str, contact_id: str` | Unblock a contact |
-
----
-
-## 5. Groups (`client.groups`)
-
-| Method | Parameters | Description |
-| :--- | :--- | :--- |
-| `list(session_id)` | `session_id: str` | List group chats for a session |
-| `get(session_id, group_id)` | `session_id: str, group_id: str` | Get group metadata |
-| `create(session_id, data)` | `session_id: str, data: dict` | Create a new group chat |
-| `add_participants(session_id, group_id, data)` | `session_id: str, group_id: str, data: dict` | Add phone numbers to group |
-| `remove_participants(session_id, group_id, data)` | `session_id: str, group_id: str, data: dict` | Remove participants from group |
-| `promote_participants(session_id, group_id, data)` | `session_id: str, group_id: str, data: dict` | Make participants admins |
-| `demote_participants(session_id, group_id, data)` | `session_id: str, group_id: str, data: dict` | Remove admin privileges |
-| `leave(session_id, group_id)` | `session_id: str, group_id: str` | Leave group chat |
-
----
-
-## 6. API Keys (`client.api_keys`)
-
-| Method | Parameters | Description |
-| :--- | :--- | :--- |
-| `list()` | - | List active API keys |
-| `create(data)` | `data: dict` | Generate a new API key with roles and scopes |
-| `delete(key_id)` | `key_id: str` | Revoke an API key |
+- `client.webhooks`: `list()`, `create(data)`, `update(id, data)`, `delete(id)`
+- `client.contacts`: `list(session_id)`, `get(session_id, contact_id)`, `block(...)`, `unblock(...)`
+- `client.groups`: `list(session_id)`, `create(session_id, data)`, `add_participants(...)`, `remove_participants(...)`, `leave(...)`
+- `client.api_keys`: `list()`, `create(data)`, `delete(id)`

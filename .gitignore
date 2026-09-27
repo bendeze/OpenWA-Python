@@ -80,6 +80,7 @@ _docs/
 
 # Python & Hybrid Stack
 venv/
+.venv/
 __pycache__/
 .pytest_cache/
 api-gateway/openwa.db
