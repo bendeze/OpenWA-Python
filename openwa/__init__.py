@@ -487,3 +487,40 @@ class _AsyncGroupsResource:
         return await self._client._request(
             "PUT", f"/api/sessions/{session_id}/groups/{group_id}/subject", data
         )
+
+
+from openwa.bot import (
+    BaseStorage,
+    Context,
+    EventPayload,
+    EventType,
+    MediaType,
+    MemoryStorage,
+    MessagePayload,
+    OpenWABot,
+    Router,
+    SenderInfo,
+    State,
+    StatesGroup,
+)
+
+__all__ = [
+    "OpenWAClient",
+    "AsyncOpenWAClient",
+    "OpenWAError",
+    "OpenWAAPIError",
+    "OpenWAClientConfig",
+    "MessageResponse",
+    "OpenWABot",
+    "Router",
+    "Context",
+    "State",
+    "StatesGroup",
+    "BaseStorage",
+    "MemoryStorage",
+    "EventPayload",
+    "EventType",
+    "MediaType",
+    "MessagePayload",
+    "SenderInfo",
+]
