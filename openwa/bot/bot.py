@@ -27,6 +27,15 @@ class OpenWABot:
         storage: Optional[BaseStorage] = None,
         client: Optional[AsyncOpenWAClient] = None,
     ) -> None:
+        """Initialize OpenWABot framework instance.
+
+        Args:
+            base_url: Base URL of the OpenWA engine (or read from OPENWA_BASE_URL).
+            api_key: API key for authentication (or read from OPENWA_API_KEY).
+            timeout: HTTP request timeout in seconds.
+            storage: Optional FSM storage backend (defaults to MemoryStorage).
+            client: Optional pre-configured AsyncOpenWAClient instance.
+        """
         self.client = client or AsyncOpenWAClient(
             base_url=base_url or os.getenv("OPENWA_BASE_URL"),
             api_key=api_key or os.getenv("OPENWA_API_KEY"),
@@ -47,7 +56,18 @@ class OpenWABot:
         is_group: Optional[bool] = None,
         filters: Optional[List[FilterFunc]] = None,
     ) -> Callable[[HandlerFunc], HandlerFunc]:
-        """Register a command handler (e.g. /start, !help)."""
+        """Register a command handler (e.g. /start, !help).
+
+        Args:
+            command: Command name or sequence of command names to match.
+            prefixes: Allowed prefix characters (default: '/', '!', '#', '.').
+            state: Optional FSM state(s) to restrict this command to.
+            is_group: Filter for group chats (True) or private chats (False).
+            filters: Optional custom predicate filter functions.
+
+        Returns:
+            Decorator function registering the handler.
+        """
         return self.router.on_command(
             command=command,
             prefixes=prefixes,
@@ -63,7 +83,17 @@ class OpenWABot:
         is_group: Optional[bool] = None,
         filters: Optional[List[FilterFunc]] = None,
     ) -> Callable[[HandlerFunc], HandlerFunc]:
-        """Register a message handler."""
+        """Register a message handler.
+
+        Args:
+            pattern: Optional regex pattern to match against message text.
+            state: Optional FSM state(s) to restrict this handler to.
+            is_group: Filter for group chats (True) or private chats (False).
+            filters: Optional custom predicate filter functions.
+
+        Returns:
+            Decorator function registering the handler.
+        """
         return self.router.on_message(
             pattern=pattern,
             state=state,
@@ -78,7 +108,17 @@ class OpenWABot:
         is_group: Optional[bool] = None,
         filters: Optional[List[FilterFunc]] = None,
     ) -> Callable[[HandlerFunc], HandlerFunc]:
-        """Register a media message handler."""
+        """Register a media message handler.
+
+        Args:
+            media_type: Optional MediaType or sequence of MediaTypes to match.
+            state: Optional FSM state(s) to restrict this handler to.
+            is_group: Filter for group chats (True) or private chats (False).
+            filters: Optional custom predicate filter functions.
+
+        Returns:
+            Decorator function registering the handler.
+        """
         return self.router.on_media(
             media_type=media_type,
             state=state,
@@ -91,7 +131,15 @@ class OpenWABot:
         state: Optional[Union[State, str, List[Union[State, str]]]] = None,
         filters: Optional[List[FilterFunc]] = None,
     ) -> Callable[[HandlerFunc], HandlerFunc]:
-        """Register a message reaction handler."""
+        """Register a message reaction handler.
+
+        Args:
+            state: Optional FSM state(s) to restrict this handler to.
+            filters: Optional custom predicate filter functions.
+
+        Returns:
+            Decorator function registering the handler.
+        """
         return self.router.on_reaction(state=state, filters=filters)
 
     def on_event(
@@ -100,7 +148,16 @@ class OpenWABot:
         state: Optional[Union[State, str, List[Union[State, str]]]] = None,
         filters: Optional[List[FilterFunc]] = None,
     ) -> Callable[[HandlerFunc], HandlerFunc]:
-        """Register an arbitrary WhatsApp system event handler."""
+        """Register an arbitrary WhatsApp system event handler.
+
+        Args:
+            event_type: EventType enum or string name.
+            state: Optional FSM state(s) to restrict this handler to.
+            filters: Optional custom predicate filter functions.
+
+        Returns:
+            Decorator function registering the handler.
+        """
         return self.router.on_event(
             event_type=event_type,
             state=state,
@@ -108,7 +165,11 @@ class OpenWABot:
         )
 
     def include_router(self, router: Router) -> None:
-        """Attach a sub-router module to this bot."""
+        """Attach a sub-router module to this bot.
+
+        Args:
+            router: Sub-router instance to include.
+        """
         self.router.include_router(router)
 
     # -------------------------------------------------------------------------
@@ -116,7 +177,14 @@ class OpenWABot:
     # -------------------------------------------------------------------------
 
     def parse_raw_event(self, raw_data: Dict[str, Any]) -> EventPayload:
-        """Parse arbitrary OpenWA webhook payload into a normalized EventPayload."""
+        """Parse arbitrary OpenWA webhook payload into a normalized EventPayload.
+
+        Args:
+            raw_data: Raw JSON dictionary received from OpenWA webhook.
+
+        Returns:
+            Normalized EventPayload model.
+        """
         event_str = (
             raw_data.get("event")
             or raw_data.get("type")
@@ -212,11 +280,25 @@ class OpenWABot:
         )
 
     async def feed_event(self, event: EventPayload) -> bool:
-        """Feed a normalized EventPayload to the bot router."""
+        """Feed a normalized EventPayload to the bot router.
+
+        Args:
+            event: Normalized EventPayload instance.
+
+        Returns:
+            True if event was handled by a matching handler, False otherwise.
+        """
         ctx = Context(event=event, client=self.client, storage=self.storage)
         return await self.router.dispatch(ctx)
 
     async def feed_raw_event(self, raw_data: Dict[str, Any]) -> bool:
-        """Feed a raw JSON webhook payload directly to the bot."""
+        """Feed a raw JSON webhook payload directly to the bot.
+
+        Args:
+            raw_data: Raw webhook JSON dictionary from OpenWA engine.
+
+        Returns:
+            True if event was handled by a matching handler, False otherwise.
+        """
         event = self.parse_raw_event(raw_data)
         return await self.feed_event(event)

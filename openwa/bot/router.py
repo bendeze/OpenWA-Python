@@ -32,6 +32,19 @@ class HandlerRegistration:
         is_group: Optional[bool] = None,
         custom_filters: Optional[List[FilterFunc]] = None,
     ) -> None:
+        """Initialize handler registration with filtering rules.
+
+        Args:
+            func: Async handler callback function.
+            event_types: List of matching EventType enums.
+            commands: List of command names (case-insensitive).
+            prefixes: Allowed command prefixes (e.g. '/', '!').
+            pattern: Compiled regular expression for text matching.
+            media_types: List of matching MediaType enums.
+            state: Allowed FSM state(s).
+            is_group: True for group messages only, False for direct chats only, None for both.
+            custom_filters: List of custom filter functions.
+        """
         self.func = func
         self.event_types = event_types or []
         self.commands = [c.lower() for c in (commands or [])]
@@ -43,7 +56,14 @@ class HandlerRegistration:
         self.custom_filters = custom_filters or []
 
     async def matches(self, ctx: Context) -> bool:
-        """Check if incoming Context satisfies all conditions for this handler."""
+        """Check if incoming Context satisfies all conditions for this handler.
+
+        Args:
+            ctx: Incoming event context.
+
+        Returns:
+            True if all filter criteria match, False otherwise.
+        """
         # 1. Event Type Check
         if self.event_types and ctx.event.event not in self.event_types:
             return False
@@ -107,12 +127,21 @@ class Router:
     """Manages routing of incoming events to registered handler callbacks."""
 
     def __init__(self, name: Optional[str] = None) -> None:
+        """Initialize Router instance.
+
+        Args:
+            name: Optional name for debugging and identifying sub-routers.
+        """
         self.name = name or "root"
         self.handlers: List[HandlerRegistration] = []
         self.sub_routers: List[Router] = []
 
     def include_router(self, router: Router) -> None:
-        """Attach a sub-router."""
+        """Attach a sub-router module.
+
+        Args:
+            router: Sub-router instance to include.
+        """
         self.sub_routers.append(router)
 
     def on_command(
@@ -123,7 +152,18 @@ class Router:
         is_group: Optional[bool] = None,
         filters: Optional[List[FilterFunc]] = None,
     ) -> Callable[[HandlerFunc], HandlerFunc]:
-        """Decorator for command messages (e.g. /start, !help)."""
+        """Decorator for command messages (e.g. /start, !help).
+
+        Args:
+            command: Command name or sequence of command names to match.
+            prefixes: Allowed prefix characters (default: '/', '!', '#', '.').
+            state: Optional FSM state(s) to restrict this command to.
+            is_group: Filter for group chats (True) or private chats (False).
+            filters: Optional custom predicate filter functions.
+
+        Returns:
+            Decorator function registering the handler.
+        """
         cmds = [command] if isinstance(command, str) else list(command)
 
         def decorator(func: HandlerFunc) -> HandlerFunc:
@@ -148,7 +188,17 @@ class Router:
         is_group: Optional[bool] = None,
         filters: Optional[List[FilterFunc]] = None,
     ) -> Callable[[HandlerFunc], HandlerFunc]:
-        """Decorator for general text messages."""
+        """Decorator for general text messages.
+
+        Args:
+            pattern: Optional regex pattern string or compiled Pattern to match message body.
+            state: Optional FSM state(s) to restrict this handler to.
+            is_group: Filter for group chats (True) or private chats (False).
+            filters: Optional custom predicate filter functions.
+
+        Returns:
+            Decorator function registering the handler.
+        """
         compiled_pattern = re.compile(pattern) if isinstance(pattern, str) else pattern
 
         def decorator(func: HandlerFunc) -> HandlerFunc:
@@ -172,7 +222,17 @@ class Router:
         is_group: Optional[bool] = None,
         filters: Optional[List[FilterFunc]] = None,
     ) -> Callable[[HandlerFunc], HandlerFunc]:
-        """Decorator for media messages (images, audio, documents, voice notes)."""
+        """Decorator for media messages (images, audio, documents, voice notes).
+
+        Args:
+            media_type: Optional MediaType or sequence of MediaTypes to match.
+            state: Optional FSM state(s) to restrict this handler to.
+            is_group: Filter for group chats (True) or private chats (False).
+            filters: Optional custom predicate filter functions.
+
+        Returns:
+            Decorator function registering the handler.
+        """
         m_types: List[MediaType] = []
         if isinstance(media_type, (MediaType, str)):
             m_types = [MediaType(media_type)]
@@ -198,7 +258,15 @@ class Router:
         state: Optional[Union[State, str, List[Union[State, str]]]] = None,
         filters: Optional[List[FilterFunc]] = None,
     ) -> Callable[[HandlerFunc], HandlerFunc]:
-        """Decorator for message reaction events."""
+        """Decorator for message reaction events.
+
+        Args:
+            state: Optional FSM state(s) to restrict this handler to.
+            filters: Optional custom predicate filter functions.
+
+        Returns:
+            Decorator function registering the handler.
+        """
 
         def decorator(func: HandlerFunc) -> HandlerFunc:
             reg = HandlerRegistration(
@@ -218,7 +286,16 @@ class Router:
         state: Optional[Union[State, str, List[Union[State, str]]]] = None,
         filters: Optional[List[FilterFunc]] = None,
     ) -> Callable[[HandlerFunc], HandlerFunc]:
-        """Decorator for arbitrary WhatsApp system events (e.g. qr, session_status)."""
+        """Decorator for arbitrary WhatsApp system events (e.g. qr, session_status).
+
+        Args:
+            event_type: EventType enum or event string name.
+            state: Optional FSM state(s) to restrict this handler to.
+            filters: Optional custom predicate filter functions.
+
+        Returns:
+            Decorator function registering the handler.
+        """
         ev_type = EventType(event_type)
 
         def decorator(func: HandlerFunc) -> HandlerFunc:
@@ -234,7 +311,14 @@ class Router:
         return decorator
 
     async def dispatch(self, ctx: Context) -> bool:
-        """Dispatch context to matching handler in this router or sub-routers."""
+        """Dispatch context to matching handler in this router or sub-routers.
+
+        Args:
+            ctx: Incoming event execution context.
+
+        Returns:
+            True if a matching handler was found and executed, False otherwise.
+        """
         # 1. Check direct handlers
         for handler in self.handlers:
             if await handler.matches(ctx):
