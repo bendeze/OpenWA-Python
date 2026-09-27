@@ -5,7 +5,7 @@ import os
 # Add root directory to path so 'sdk' can be imported
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../")))
 
-from sdk.python.openwa import OpenWAClient, AsyncOpenWAClient, OpenWAAPIError
+from openwa import OpenWAClient, AsyncOpenWAClient, OpenWAAPIError
 
 @pytest.fixture
 def sync_client():
