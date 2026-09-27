@@ -54,6 +54,7 @@ class StatesGroupMeta(type):
 
 class StatesGroup(metaclass=StatesGroupMeta):
     """Base class for grouping conversation states."""
+
     pass
 
 

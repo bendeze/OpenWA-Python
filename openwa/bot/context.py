@@ -5,8 +5,9 @@ Context object passed to bot event and message handlers.
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
-from openwa.bot.types import EventPayload, MessagePayload
+
 from openwa.bot.fsm import BaseStorage, State, StorageKey
+from openwa.bot.types import EventPayload, MessagePayload
 
 if TYPE_CHECKING:
     from openwa import AsyncOpenWAClient

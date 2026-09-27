@@ -3,7 +3,8 @@ Example: Building a WhatsApp Bot with OpenWA Bot Framework & FSM.
 """
 
 import asyncio
-from openwa import OpenWABot, Context, StatesGroup, State, MediaType
+
+from openwa import Context, MediaType, OpenWABot, State, StatesGroup
 
 
 # 1. Define FSM Conversation States
@@ -13,10 +14,7 @@ class SurveyForm(StatesGroup):
 
 
 # 2. Initialize Bot
-bot = OpenWABot(
-    base_url="http://localhost:3000",
-    api_key="your_api_key_here"
-)
+bot = OpenWABot(base_url="http://localhost:3000", api_key="your_api_key_here")
 
 
 # 3. Register Command Handlers
@@ -61,7 +59,9 @@ async def process_feedback(ctx: Context):
     # Clear state when finished
     await ctx.clear_state()
 
-    await ctx.reply(f"✅ Thank you {name}! Your feedback has been recorded:\n\n\"{feedback}\"")
+    await ctx.reply(
+        f'✅ Thank you {name}! Your feedback has been recorded:\n\n"{feedback}"'
+    )
 
 
 # 5. Media Handler
@@ -75,15 +75,17 @@ async def main():
     print("🤖 Simulating incoming webhook events...")
 
     # Simulate /start command
-    await bot.feed_raw_event({
-        "event": "message",
-        "session": "default",
-        "data": {
-            "id": "msg_001",
-            "from": "1234567890@c.us",
-            "body": "/start",
+    await bot.feed_raw_event(
+        {
+            "event": "message",
+            "session": "default",
+            "data": {
+                "id": "msg_001",
+                "from": "1234567890@c.us",
+                "body": "/start",
+            },
         }
-    })
+    )
 
     print("✅ Webhook simulation complete.")
 

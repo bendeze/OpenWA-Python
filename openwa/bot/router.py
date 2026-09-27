@@ -6,17 +6,8 @@ from __future__ import annotations
 
 import inspect
 import re
-from typing import (
-    Any,
-    Callable,
-    Coroutine,
-    Dict,
-    List,
-    Optional,
-    Pattern,
-    Sequence,
-    Union,
-)
+from typing import (Any, Callable, Coroutine, Dict, List, Optional, Pattern,
+                    Sequence, Union)
 
 from openwa.bot.context import Context
 from openwa.bot.fsm import State
@@ -158,9 +149,7 @@ class Router:
         filters: Optional[List[FilterFunc]] = None,
     ) -> Callable[[HandlerFunc], HandlerFunc]:
         """Decorator for general text messages."""
-        compiled_pattern = (
-            re.compile(pattern) if isinstance(pattern, str) else pattern
-        )
+        compiled_pattern = re.compile(pattern) if isinstance(pattern, str) else pattern
 
         def decorator(func: HandlerFunc) -> HandlerFunc:
             reg = HandlerRegistration(

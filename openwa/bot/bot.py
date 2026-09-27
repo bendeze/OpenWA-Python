@@ -5,28 +5,15 @@ Main OpenWABot class combining Client, Router, and FSM Storage.
 from __future__ import annotations
 
 import os
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Pattern,
-    Sequence,
-    Union,
-)
+from typing import (Any, Callable, Dict, List, Optional, Pattern, Sequence,
+                    Union)
 
 from openwa import AsyncOpenWAClient
 from openwa.bot.context import Context
 from openwa.bot.fsm import BaseStorage, MemoryStorage, State
 from openwa.bot.router import FilterFunc, HandlerFunc, Router
-from openwa.bot.types import (
-    EventPayload,
-    EventType,
-    MediaType,
-    MessagePayload,
-    SenderInfo,
-)
+from openwa.bot.types import (EventPayload, EventType, MediaType,
+                              MessagePayload, SenderInfo)
 
 
 class OpenWABot:
@@ -142,11 +129,7 @@ class OpenWABot:
             or raw_data.get("session_id")
             or "default"
         )
-        data = (
-            raw_data.get("data")
-            or raw_data.get("payload")
-            or raw_data
-        )
+        data = raw_data.get("data") or raw_data.get("payload") or raw_data
 
         try:
             event_type = EventType(event_str)
@@ -165,18 +148,9 @@ class OpenWABot:
                 or (data.get("_data", {}).get("id", {}).get("_serialized"))
                 or ""
             )
-            chat_id = (
-                data.get("from")
-                or data.get("chatId")
-                or data.get("to")
-                or ""
-            )
+            chat_id = data.get("from") or data.get("chatId") or data.get("to") or ""
             if msg_id or chat_id:
-                sender_id = (
-                    data.get("author")
-                    or data.get("from")
-                    or chat_id
-                )
+                sender_id = data.get("author") or data.get("from") or chat_id
                 sender_name = (
                     data.get("_data", {}).get("notifyName")
                     or data.get("senderName")
@@ -184,20 +158,23 @@ class OpenWABot:
                 )
                 sender = SenderInfo(id=sender_id, name=sender_name)
 
-                body = (
-                    data.get("body")
-                    or data.get("text")
-                    or data.get("caption")
-                )
+                body = data.get("body") or data.get("text") or data.get("caption")
                 has_media = bool(
-                    data.get("hasMedia")
-                    or data.get("mediaUrl")
-                    or data.get("mimetype")
+                    data.get("hasMedia") or data.get("mediaUrl") or data.get("mimetype")
                 )
 
                 media_type = MediaType.NONE
                 raw_type = str(data.get("type", "")).lower()
-                if raw_type in ("image", "ptt", "audio", "video", "document", "sticker", "location", "poll"):
+                if raw_type in (
+                    "image",
+                    "ptt",
+                    "audio",
+                    "video",
+                    "document",
+                    "sticker",
+                    "location",
+                    "poll",
+                ):
                     if raw_type == "ptt":
                         media_type = MediaType.VOICE
                     else:
@@ -206,14 +183,8 @@ class OpenWABot:
                         except ValueError:
                             media_type = MediaType.NONE
 
-                is_group = bool(
-                    data.get("isGroup")
-                    or str(chat_id).endswith("@g.us")
-                )
-                is_from_me = bool(
-                    data.get("fromMe")
-                    or data.get("isFromMe")
-                )
+                is_group = bool(data.get("isGroup") or str(chat_id).endswith("@g.us"))
+                is_from_me = bool(data.get("fromMe") or data.get("isFromMe"))
 
                 msg_payload = MessagePayload(
                     id=str(msg_id),

@@ -5,19 +5,9 @@ Unit tests for OpenWA Bot Framework & Router.
 import unittest
 from unittest.mock import AsyncMock, patch
 
-from openwa.bot import (
-    Context,
-    EventPayload,
-    EventType,
-    MediaType,
-    MemoryStorage,
-    MessagePayload,
-    OpenWABot,
-    Router,
-    SenderInfo,
-    State,
-    StatesGroup,
-)
+from openwa.bot import (Context, EventPayload, EventType, MediaType,
+                        MemoryStorage, MessagePayload, OpenWABot, Router,
+                        SenderInfo, State, StatesGroup)
 
 
 class FormStates(StatesGroup):
@@ -71,7 +61,7 @@ class TestBotFramework(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(called)
         self.bot.client._request.assert_awaited_once_with(
             "POST",
-            "/api/sessions/default/messages/text",
+            "/api/sessions/default/messages/send-text",
             {"chatId": "1234567890@c.us", "text": "Welcome!"},
         )
 
@@ -142,21 +132,27 @@ class TestBotFramework(unittest.IsolatedAsyncioTestCase):
         # 1. Start registration
         await self.bot.feed_event(self._create_message_event(text="/register"))
         self.assertEqual(
-            await self.bot.storage.get_state(("default", "1234567890@c.us", "1234567890@c.us")),
+            await self.bot.storage.get_state(
+                ("default", "1234567890@c.us", "1234567890@c.us")
+            ),
             "FormStates:waiting_for_name",
         )
 
         # 2. Provide name
         await self.bot.feed_event(self._create_message_event(text="Alice"))
         self.assertEqual(
-            await self.bot.storage.get_state(("default", "1234567890@c.us", "1234567890@c.us")),
+            await self.bot.storage.get_state(
+                ("default", "1234567890@c.us", "1234567890@c.us")
+            ),
             "FormStates:waiting_for_age",
         )
 
         # 3. Provide age
         await self.bot.feed_event(self._create_message_event(text="28"))
         self.assertIsNone(
-            await self.bot.storage.get_state(("default", "1234567890@c.us", "1234567890@c.us"))
+            await self.bot.storage.get_state(
+                ("default", "1234567890@c.us", "1234567890@c.us")
+            )
         )
 
     async def test_sub_router(self):

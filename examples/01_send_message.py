@@ -5,10 +5,7 @@ Basic Example: Sending a message using OpenWA Python SDK.
 from openwa import OpenWAClient
 
 # 1. Initialize client pointing to your running OpenWA instance
-client = OpenWAClient(
-    base_url="http://localhost:3000",
-    api_key="your_api_key_here"
-)
+client = OpenWAClient(base_url="http://localhost:3000", api_key="your_api_key_here")
 
 # 2. List active WhatsApp sessions
 sessions = client.sessions.list()

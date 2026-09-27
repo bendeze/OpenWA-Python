@@ -6,11 +6,13 @@ from __future__ import annotations
 
 from enum import Enum
 from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel, Field
 
 
 class EventType(str, Enum):
     """WhatsApp event types dispatched by OpenWA."""
+
     MESSAGE = "message"
     MESSAGE_CREATE = "message_create"
     MESSAGE_REACTION = "message_reaction"
@@ -25,6 +27,7 @@ class EventType(str, Enum):
 
 class MediaType(str, Enum):
     """Supported media types."""
+
     IMAGE = "image"
     VIDEO = "video"
     AUDIO = "audio"
@@ -39,6 +42,7 @@ class MediaType(str, Enum):
 
 class SenderInfo(BaseModel):
     """Information about the sender of a message."""
+
     id: str
     name: Optional[str] = None
     phone: Optional[str] = None
@@ -47,6 +51,7 @@ class SenderInfo(BaseModel):
 
 class MessagePayload(BaseModel):
     """Normalized WhatsApp incoming message payload."""
+
     id: str
     session_id: str
     chat_id: str
@@ -88,6 +93,7 @@ class MessagePayload(BaseModel):
 
 class EventPayload(BaseModel):
     """Normalized incoming webhook event wrapper."""
+
     event: EventType = EventType.UNKNOWN
     session_id: str
     data: Dict[str, Any] = Field(default_factory=dict)
